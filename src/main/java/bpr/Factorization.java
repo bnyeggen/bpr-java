@@ -62,8 +62,10 @@ public class Factorization implements Serializable {
 	 * could coordinate lockfree updating ahead of time.*/
 	public void update(PreferenceTuple p, double learnRate, double regularization){
 		personLocks[p.personID%personLocks.length].lock();
-		itemLocks[Math.max(p.lessPreferredItem,p.morePreferredItem)%itemLocks.length].lock();
-		itemLocks[Math.min(p.lessPreferredItem,p.morePreferredItem)%itemLocks.length].lock();
+		int minLockIdx = Math.min(p.lessPreferredItem,p.morePreferredItem)%itemLocks.length;
+		int maxLockIdx = Math.max(p.lessPreferredItem,p.morePreferredItem)%itemLocks.length;
+		itemLocks[maxLockIdx].lock();
+		if (minLockIdx!=maxLockIdx) itemLocks[minLockIdx].lock();
 		
 		try {
 			double morePreferredScore = predict(p.personID, p.morePreferredItem);
@@ -82,8 +84,8 @@ public class Factorization implements Serializable {
 				jItemFactor.addToEntry(i, -learnRate * (dxuij * -wuf - regularization * hjf));
 			}
 		} finally{
-			itemLocks[Math.min(p.lessPreferredItem,p.morePreferredItem) % itemLocks.length].unlock();
-			itemLocks[Math.max(p.lessPreferredItem,p.morePreferredItem) % itemLocks.length].unlock();
+			itemLocks[minLockIdx].unlock();
+			if (maxLockIdx!=minLockIdx) itemLocks[maxLockIdx].unlock();
 			personLocks[p.personID % personLocks.length].unlock();
 		}
 	}
