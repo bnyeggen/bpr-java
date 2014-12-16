@@ -1,20 +1,19 @@
 package bpr;
 
-import java.io.Serializable;
-import java.util.Map;
-import java.util.HashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.random.MersenneTwister;
 import org.apache.commons.math3.random.RandomGenerator;
 
-public class Factorization implements Serializable {
+public class Factorization {
 	private final int k;
 	//Only necessary for initialization of new factors.
 	private final RandomGenerator rng;
-	private final Map<Integer, ArrayRealVector> personFactors=new HashMap<Integer, ArrayRealVector>();
-	private final Map<Integer, ArrayRealVector> itemFactors=new HashMap<Integer, ArrayRealVector>();
+	private final TIntObjectHashMap<ArrayRealVector> personFactors=new TIntObjectHashMap<ArrayRealVector>();
+	private final TIntObjectHashMap<ArrayRealVector> itemFactors=new TIntObjectHashMap<ArrayRealVector>();
 	
 	/*Instead of a ring of locks, we could use ConcurrentHashMaps with a lock for each key*/
 	private ReentrantLock[] itemLocks;
@@ -48,7 +47,7 @@ public class Factorization implements Serializable {
 	/**@return A k-long vector of standard-normally distributed reals, for
 	 * initializing new person and item factors.*/
 	protected ArrayRealVector newFactor(){
-		ArrayRealVector out = new ArrayRealVector(k);
+		final ArrayRealVector out = new ArrayRealVector(k);
 		synchronized (rng) {
 			for (int i=0;i<k;i++){
 				out.setEntry(i, rng.nextGaussian());
@@ -62,23 +61,23 @@ public class Factorization implements Serializable {
 	 * could coordinate lockfree updating ahead of time.*/
 	public void update(PreferenceTuple p, double learnRate, double regularization){
 		personLocks[p.personID%personLocks.length].lock();
-		int minLockIdx = Math.min(p.lessPreferredItem,p.morePreferredItem)%itemLocks.length;
-		int maxLockIdx = Math.max(p.lessPreferredItem,p.morePreferredItem)%itemLocks.length;
+		final int minLockIdx = Math.min(p.lessPreferredItem,p.morePreferredItem)%itemLocks.length;
+		final int maxLockIdx = Math.max(p.lessPreferredItem,p.morePreferredItem)%itemLocks.length;
 		itemLocks[maxLockIdx].lock();
 		if (minLockIdx!=maxLockIdx) itemLocks[minLockIdx].lock();
 		
 		try {
-			double morePreferredScore = predict(p.personID, p.morePreferredItem);
-			double lessPreferredScore = predict(p.personID, p.lessPreferredItem);
-			double dxuij = (1.0 / (1 + Math.exp(morePreferredScore - lessPreferredScore)));
+			final double morePreferredScore = predict(p.personID, p.morePreferredItem);
+			final double lessPreferredScore = predict(p.personID, p.lessPreferredItem);
+			final double dxuij = (1.0 / (1 + Math.exp(morePreferredScore - lessPreferredScore)));
 			
-			ArrayRealVector personFactor = personFactors.get(p.personID);
-			ArrayRealVector iItemFactor = itemFactors.get(p.lessPreferredItem);
-			ArrayRealVector jItemFactor = itemFactors.get(p.morePreferredItem);
+			final ArrayRealVector personFactor = personFactors.get(p.personID);
+			final ArrayRealVector iItemFactor = itemFactors.get(p.lessPreferredItem);
+			final ArrayRealVector jItemFactor = itemFactors.get(p.morePreferredItem);
 			for(int i=0;i<k;i++){
-				double wuf = personFactor.getEntry(i);
-				double hif = iItemFactor.getEntry(i);
-				double hjf = jItemFactor.getEntry(i);
+				final double wuf = personFactor.getEntry(i);
+				final double hif = iItemFactor.getEntry(i);
+				final double hjf = jItemFactor.getEntry(i);
 				personFactor.addToEntry(i, -learnRate * (dxuij * (hif - hjf) - regularization * wuf));
 				iItemFactor.addToEntry(i, -learnRate * (dxuij * wuf - regularization * hif));
 				jItemFactor.addToEntry(i, -learnRate * (dxuij * -wuf - regularization * hjf));

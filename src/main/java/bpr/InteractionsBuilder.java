@@ -1,15 +1,14 @@
 package bpr;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.HashSet;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**A factory for SamplableInteractionsLists.  This version does not support
  * concurrent inserts.*/
-public class InteractionsBuilder implements Serializable {
+public class InteractionsBuilder {
 	
-	private final HashMap<Integer,HashSet<Integer>> personToItemSet = 
-			new HashMap<Integer,HashSet<Integer>>();
+	private final TIntObjectHashMap<TIntHashSet> personToItemSet = 
+			new TIntObjectHashMap<TIntHashSet>();
 	
 	/**@return a PersonSamplableInteractions based on the current state of the
 	 * InteractionsBuilder.*/
@@ -26,7 +25,7 @@ public class InteractionsBuilder implements Serializable {
 	/**Adds the person-item combination to the state of the factory.*/
 	public void addInteraction(int personID, int itemID){
 		if(!personToItemSet.containsKey(personID)){
-			personToItemSet.put(personID, new HashSet<Integer>());
+			personToItemSet.put(personID, new TIntHashSet());
 		}
 		personToItemSet.get(personID).add(itemID);
 	}
@@ -39,7 +38,7 @@ public class InteractionsBuilder implements Serializable {
 	/**Remove all records for the item.  O(n) operation, as it traverses the
 	 * entire map.*/
 	public void removeItem(int itemID){
-		for(HashSet<Integer> items:personToItemSet.values()){
+		for(TIntHashSet items:personToItemSet.valueCollection()){
 			items.remove(itemID);
 		}
 	}

@@ -1,13 +1,13 @@
 package bpr;
 
-import java.io.Serializable;
-import java.util.HashSet;
+import gnu.trove.set.hash.TIntHashSet;
+
 import java.util.concurrent.ConcurrentHashMap;
 
 /**A version of InteractionsBuilder that can handle concurrent inserts.*/
-public class ConcurrentInteractionsBuilder implements Serializable {
+public class ConcurrentInteractionsBuilder {
 	
-	private final ConcurrentHashMap<Integer, HashSet<Integer>> personToItemSet = new ConcurrentHashMap<Integer, HashSet<Integer>>();
+	private final ConcurrentHashMap<Integer, TIntHashSet> personToItemSet = new ConcurrentHashMap<Integer, TIntHashSet>();
 
 	/**@return a PersonSamplableInteractions based on the current state of the
 	 * InteractionsBuilder.*/
@@ -23,7 +23,7 @@ public class ConcurrentInteractionsBuilder implements Serializable {
 	
 	/**Adds the person-item combination to the state of the factory.*/
 	public void addInteraction(int personID, int itemID){
-		personToItemSet.putIfAbsent(personID, new HashSet<Integer>()).add(itemID);
+		personToItemSet.putIfAbsent(personID, new TIntHashSet()).add(itemID);
 	}
 	
 	/**Remove all records for the person. O(1) operation.*/
@@ -34,7 +34,7 @@ public class ConcurrentInteractionsBuilder implements Serializable {
 	/**Remove all records for the item.  O(n) operation, as it traverses the
 	 * entire map.*/
 	public void removeItem(int itemID){
-		for(HashSet<Integer> items:personToItemSet.values()){
+		for(TIntHashSet items:personToItemSet.values()){
 			items.remove(itemID);
 		}
 	}

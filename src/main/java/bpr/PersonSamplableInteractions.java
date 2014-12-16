@@ -1,12 +1,12 @@
 package bpr;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashMap;
+import gnu.trove.iterator.TIntObjectIterator;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.hash.TIntHashSet;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.commons.math3.random.MersenneTwister;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -17,33 +17,57 @@ import org.apache.commons.math3.random.RandomGenerator;
  * object approximately maximizes average area under curve per person.
  * 
  * It should usually be constructed with an InteractionsBuilder.*/
-public class PersonSamplableInteractions implements SamplableInteractionList, Serializable {
+public class PersonSamplableInteractions implements SamplableInteractionList {
 
 	private final RandomGenerator rng = new MersenneTwister();
 	
-	private final HashMap<Integer, int[]> personToItems;
+	private final TIntObjectHashMap<int[]> personToItems;
 	private final int[] uniqueItems;
 	private final int[] uniquePeople;
 	
-	public PersonSamplableInteractions(Map<Integer, ? extends Set<Integer>> personToItemSet){
-		personToItems = new HashMap<Integer,int[]>();
+	public PersonSamplableInteractions(TIntObjectHashMap<TIntHashSet> personToItemSet){
+		personToItems = new TIntObjectHashMap<int[]>();
 		uniquePeople = new int[personToItemSet.size()];
-		HashSet<Integer> items = new HashSet<Integer>();
+		final TIntHashSet items = new TIntHashSet();
+
 		int i=0;
-		for(Entry<Integer, ? extends Set<Integer>> entry:personToItemSet.entrySet()){
-			int person = entry.getKey();
-			Collection<Integer> theseItems = entry.getValue();
+		final TIntObjectIterator<TIntHashSet> it = personToItemSet.iterator();
+		while(it.hasNext()){
+			it.advance();
+			final int person = it.key();
+			final TIntHashSet theseItems = it.value();
 
 			uniquePeople[i++]=person;
 			items.addAll(theseItems);
 			
 			personToItems.put(person, new int[theseItems.size()]);
 			int j=0;
-			for(int item:theseItems) personToItems.get(person)[j++]=item;
+			for(int item:theseItems.toArray()) personToItems.get(person)[j++]=item;
 		}
 		uniqueItems = new int[items.size()];
 		i=0;
-		for (int item:items) uniqueItems[i++]=item;
+		for (int item:items.toArray()) uniqueItems[i++]=item;
+	}
+	
+	public PersonSamplableInteractions(Map<Integer, TIntHashSet> personToItemSet){
+		personToItems = new TIntObjectHashMap<int[]>();
+		uniquePeople = new int[personToItemSet.size()];
+		final TIntHashSet items = new TIntHashSet();
+		int i=0;
+		for(Entry<Integer, TIntHashSet> entry:personToItemSet.entrySet()){
+			final int person = entry.getKey();
+			final TIntHashSet theseItems = entry.getValue();
+
+			uniquePeople[i++]=person;
+			items.addAll(theseItems);
+			
+			personToItems.put(person, new int[theseItems.size()]);
+			int j=0;
+			for(int item:theseItems.toArray()) personToItems.get(person)[j++]=item;
+		}
+		uniqueItems = new int[items.size()];
+		i=0;
+		for (int item:items.toArray()) uniqueItems[i++]=item;
 	}
 	
 	@Override
