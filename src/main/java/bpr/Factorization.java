@@ -4,7 +4,6 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.random.MersenneTwister;
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -12,8 +11,8 @@ public class Factorization {
 	private final int k;
 	//Only necessary for initialization of new factors.
 	private final RandomGenerator rng;
-	private final TIntObjectHashMap<ArrayRealVector> personFactors=new TIntObjectHashMap<ArrayRealVector>();
-	private final TIntObjectHashMap<ArrayRealVector> itemFactors=new TIntObjectHashMap<ArrayRealVector>();
+	private final TIntObjectHashMap<double[]> personFactors=new TIntObjectHashMap<double[]>();
+	private final TIntObjectHashMap<double[]> itemFactors=new TIntObjectHashMap<double[]>();
 	
 	/*Instead of a ring of locks, we could use ConcurrentHashMaps with a lock for each key*/
 	private ReentrantLock[] itemLocks;
@@ -46,11 +45,11 @@ public class Factorization {
 	
 	/**@return A k-long vector of standard-normally distributed reals, for
 	 * initializing new person and item factors.*/
-	protected ArrayRealVector newFactor(){
-		final ArrayRealVector out = new ArrayRealVector(k);
+	protected double[] newFactor(){
+		final double[] out = new double[k];
 		synchronized (rng) {
 			for (int i=0;i<k;i++){
-				out.setEntry(i, rng.nextGaussian());
+				out[i] = rng.nextGaussian();
 			}
 		}
 		return out;
@@ -71,16 +70,16 @@ public class Factorization {
 			final double lessPreferredScore = predict(p.personID, p.lessPreferredItem);
 			final double dxuij = (1.0 / (1 + Math.exp(morePreferredScore - lessPreferredScore)));
 			
-			final ArrayRealVector personFactor = personFactors.get(p.personID);
-			final ArrayRealVector iItemFactor = itemFactors.get(p.lessPreferredItem);
-			final ArrayRealVector jItemFactor = itemFactors.get(p.morePreferredItem);
+			final double[] personFactor = personFactors.get(p.personID);
+			final double[] iItemFactor = itemFactors.get(p.lessPreferredItem);
+			final double[] jItemFactor = itemFactors.get(p.morePreferredItem);
 			for(int i=0;i<k;i++){
-				final double wuf = personFactor.getEntry(i);
-				final double hif = iItemFactor.getEntry(i);
-				final double hjf = jItemFactor.getEntry(i);
-				personFactor.addToEntry(i, -learnRate * (dxuij * (hif - hjf) - regularization * wuf));
-				iItemFactor.addToEntry(i, -learnRate * (dxuij * wuf - regularization * hif));
-				jItemFactor.addToEntry(i, -learnRate * (dxuij * -wuf - regularization * hjf));
+				final double wuf = personFactor[i];
+				final double hif = iItemFactor[i];
+				final double hjf = jItemFactor[i];
+				personFactor[i] += -learnRate * (dxuij * (hif - hjf) - regularization * wuf);
+				iItemFactor[i]  += -learnRate * (dxuij * wuf - regularization * hif);
+				jItemFactor[i]  += -learnRate * (dxuij * -wuf - regularization * hjf);
 			}
 		} finally{
 			itemLocks[minLockIdx].unlock();
@@ -108,7 +107,16 @@ public class Factorization {
 				personLocks[personID%personLocks.length].unlock();
 			}
 		}
-		return itemFactors.get(itemID).dotProduct(personFactors.get(personID));
+		return dot(itemFactors.get(itemID), personFactors.get(personID));
+	}
+	
+	private static double dot(double[] a, double[] b){
+		double out = 0;
+		final int len = a.length;
+		for(int i=0; i<len; i++){
+			out += a[i]*b[i];
+		}
+		return out;
 	}
 	/**@param s The set of interactions to sample from
 	 * @param nIters Number of iterations to run for
