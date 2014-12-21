@@ -2,17 +2,15 @@ package com.nyeggen.bpr;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
 
+import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
-
-import org.apache.commons.math3.random.MersenneTwister;
-import org.apache.commons.math3.random.RandomGenerator;
 
 import com.nyeggen.bpr.sampling.SamplableInteractionList;
 
-public class Factorization {
+public class BPRFactorization {
 	private final int k;
 	//Only necessary for initialization of new factors.
-	private final RandomGenerator rng;
+	private final Random rng;
 	private final TIntObjectHashMap<double[]> personFactors=new TIntObjectHashMap<double[]>();
 	private final TIntObjectHashMap<double[]> itemFactors=new TIntObjectHashMap<double[]>();
 	
@@ -22,8 +20,8 @@ public class Factorization {
 	
 	/**Construct a Factorization with the default item and person locking factors,
 	 * and the given degree of factorization.*/
-	public Factorization(int k){
-		this(k, new MersenneTwister(),128,128);
+	public BPRFactorization(int k){
+		this(k, new Random(),128,128);
 	}
 	/**Tuning these parameters is important for performance in an accuracy and
 	 * operations/second sense.  Especially, the ratio between and scale of 
@@ -36,7 +34,7 @@ public class Factorization {
 	 * buckets for item factors. More=>higher possible concurrency.
 	 * @param personLockingFactor controls the number of individually lockable
 	 * buckets for person factors.  More=> higher possible concurrency.*/
-	public Factorization(int k, RandomGenerator rng, int itemLockingFactor, int personLockingFactor){
+	public BPRFactorization(int k, Random rng, int itemLockingFactor, int personLockingFactor){
 		this.k=k;
 		this.rng = rng;
 		itemLocks = new ReentrantLock[itemLockingFactor];

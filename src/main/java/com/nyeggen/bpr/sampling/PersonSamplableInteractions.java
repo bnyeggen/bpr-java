@@ -7,9 +7,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.apache.commons.math3.random.MersenneTwister;
-import org.apache.commons.math3.random.RandomGenerator;
+import java.util.Random;
 
 import com.nyeggen.bpr.PreferenceTuple;
 
@@ -21,7 +19,7 @@ import com.nyeggen.bpr.PreferenceTuple;
  * It should usually be constructed with an InteractionsBuilder.*/
 public class PersonSamplableInteractions implements SamplableInteractionList {
 
-	private final RandomGenerator rng = new MersenneTwister();
+	private final Random rng = new Random();
 	
 	private final TIntObjectHashMap<int[]> personToItems;
 	private final int[] uniqueItems;

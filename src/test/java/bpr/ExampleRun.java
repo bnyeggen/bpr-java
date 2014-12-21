@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import com.nyeggen.bpr.Factorization;
+import com.nyeggen.bpr.BPRFactorization;
 import com.nyeggen.bpr.interaction.HashInteractionsBuilder;
 import com.nyeggen.bpr.sampling.SamplableInteractionList;
 
@@ -16,7 +16,7 @@ public class ExampleRun {
 	public final void exampleRun() {
 		Random rng = new Random();
 		HashInteractionsBuilder builder = new HashInteractionsBuilder();
-		Factorization fzation = new Factorization(10);
+		BPRFactorization fzation = new BPRFactorization(10);
 		
 		//100 possible items, 100 people, 10 items / person.
 		for(int i=0; i<1000; i++){
