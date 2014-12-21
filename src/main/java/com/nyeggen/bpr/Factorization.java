@@ -1,4 +1,4 @@
-package bpr;
+package com.nyeggen.bpr;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
 
@@ -6,6 +6,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.math3.random.MersenneTwister;
 import org.apache.commons.math3.random.RandomGenerator;
+
+import com.nyeggen.bpr.sampling.SamplableInteractionList;
 
 public class Factorization {
 	private final int k;

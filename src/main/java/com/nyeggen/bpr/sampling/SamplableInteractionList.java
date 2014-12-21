@@ -1,4 +1,6 @@
-package bpr;
+package com.nyeggen.bpr.sampling;
+
+import com.nyeggen.bpr.PreferenceTuple;
 
 /**Interface representing a set of interactions, from which can be sampled
  * tuples consisting of a person, a more-preferred item, and a less-preferred

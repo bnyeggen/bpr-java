@@ -1,4 +1,4 @@
-package bpr;
+package com.nyeggen.bpr.sampling;
 
 import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.list.array.TIntArrayList;
@@ -11,6 +11,8 @@ import java.util.Map.Entry;
 
 import org.apache.commons.math3.random.MersenneTwister;
 import org.apache.commons.math3.random.RandomGenerator;
+
+import com.nyeggen.bpr.PreferenceTuple;
 
 /**Getting records from an object of this class selects person-item pairs
  * with equal odds.  This means that popular items will be somewhat oversampled

@@ -1,7 +1,13 @@
 package bpr;
 
 import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import com.nyeggen.bpr.Factorization;
+import com.nyeggen.bpr.interaction.HashInteractionsBuilder;
+import com.nyeggen.bpr.sampling.SamplableInteractionList;
+
 import java.util.Random;
 
 public class ExampleRun {
@@ -9,7 +15,7 @@ public class ExampleRun {
 	@Test
 	public final void exampleRun() {
 		Random rng = new Random();
-		InteractionsBuilder builder = new InteractionsBuilder();
+		HashInteractionsBuilder builder = new HashInteractionsBuilder();
 		Factorization fzation = new Factorization(10);
 		
 		//100 possible items, 100 people, 10 items / person.

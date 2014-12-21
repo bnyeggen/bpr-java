@@ -1,4 +1,4 @@
-package bpr;
+package com.nyeggen.bpr.sampling;
 
 import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -10,6 +10,8 @@ import java.util.Map.Entry;
 
 import org.apache.commons.math3.random.MersenneTwister;
 import org.apache.commons.math3.random.RandomGenerator;
+
+import com.nyeggen.bpr.PreferenceTuple;
 
 /**Getting a PreferenceTuple from an object of this class selects a person-
  * preferred item pair with equal odds for each person, and then equal odds for

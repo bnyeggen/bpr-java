@@ -1,11 +1,14 @@
-package bpr;
+package com.nyeggen.bpr.interaction;
+
+import com.nyeggen.bpr.sampling.ItemSamplableInteractions;
+import com.nyeggen.bpr.sampling.PersonSamplableInteractions;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 
 /**A factory for SamplableInteractionsLists.  This version does not support
  * concurrent inserts.*/
-public class InteractionsBuilder {
+public class HashInteractionsBuilder implements InteractionsBuilder {
 	
 	private final TIntObjectHashMap<TIntHashSet> personToItemSet = 
 			new TIntObjectHashMap<TIntHashSet>();
